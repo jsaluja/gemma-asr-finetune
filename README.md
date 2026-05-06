@@ -117,3 +117,40 @@ After training you'll find in your [HuggingFace](https://huggingface.co) account
 
 - `{your-username}/gemma-4-e2b-r8-{dataset}-epochs-{n}-{timestamp}` — LoRA adapter (safetensors)
 - `{your-username}/gemma-4-e2b-r8-{dataset}-epochs-{n}-{timestamp}-gguf` — GGUF adapter for use with [llama.cpp](https://github.com/ggml-org/llama.cpp)
+
+## Using your trained model
+
+### GGUF with llama.cpp (recommended for local inference)
+
+Download the GGUF repo from HuggingFace and run with [`llama-mtmd-cli`](https://github.com/ggml-org/llama.cpp):
+
+```bash
+llama-mtmd-cli \
+  -m path/to/base-model.gguf \
+  --mmproj path/to/mmproj.gguf \
+  --lora path/to/lora-adapter.gguf \
+  --audio your_audio.wav \
+  -p "Please transcribe this audio." \
+  --temp 0 -n 256 --jinja
+```
+
+The base model and mmproj files come from the [Gemma 4 GGUF release](https://huggingface.co/unsloth/gemma-4-E2B-it-GGUF). The LoRA adapter is what your training run produced.
+
+### LM Studio
+
+[LM Studio](https://lmstudio.ai) supports GGUF models with LoRA adapters. Load the base Gemma 4 model and attach your LoRA adapter from the model settings panel.
+
+### Python (HuggingFace + PEFT)
+
+```python
+from transformers import AutoProcessor
+from peft import PeftModel
+from unsloth import FastModel
+
+model, processor = FastModel.from_pretrained(
+    "unsloth/gemma-4-E2B-it",
+    load_in_4bit=True,
+)
+model = PeftModel.from_pretrained(model, "your-username/your-lora-repo")
+model.eval()
+```
