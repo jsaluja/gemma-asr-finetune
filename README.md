@@ -122,19 +122,43 @@ After training you'll find in your [HuggingFace](https://huggingface.co) account
 
 ### GGUF with llama.cpp (recommended for local inference)
 
-Download the GGUF repo from HuggingFace and run with [`llama-mtmd-cli`](https://github.com/ggml-org/llama.cpp):
+**1. Install llama.cpp**
+
+```bash
+# macOS
+brew install llama.cpp
+
+# or build from source
+git clone https://github.com/ggml-org/llama.cpp && cd llama.cpp && cmake -B build && cmake --build build -t llama-mtmd-cli
+```
+
+**2. Download the base model and mmproj**
+
+```bash
+huggingface-cli download unsloth/gemma-4-E2B-it-GGUF \
+  --include "gemma-4-E2B-it-Q8_0.gguf" "mmproj-gemma-4-E2B-it-Q8_0.gguf" \
+  --local-dir ./models
+```
+
+**3. Download your LoRA adapter**
+
+```bash
+huggingface-cli download your-username/your-lora-gguf-repo \
+  --include "lora-adapter.gguf" \
+  --local-dir ./models
+```
+
+**4. Run inference**
 
 ```bash
 llama-mtmd-cli \
-  -m path/to/base-model.gguf \
-  --mmproj path/to/mmproj.gguf \
-  --lora path/to/lora-adapter.gguf \
+  -m models/gemma-4-E2B-it-Q8_0.gguf \
+  --mmproj models/mmproj-gemma-4-E2B-it-Q8_0.gguf \
+  --lora models/lora-adapter.gguf \
   --audio your_audio.wav \
   -p "Please transcribe this audio." \
   --temp 0 -n 256 --jinja
 ```
-
-The base model and mmproj files come from the [Gemma 4 GGUF release](https://huggingface.co/unsloth/gemma-4-E2B-it-GGUF). The LoRA adapter is what your training run produced.
 
 ### LM Studio
 
